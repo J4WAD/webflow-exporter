@@ -5,25 +5,23 @@ import {
   removeIframes,
   modifyImages,
 } from "./lib/extract.mjs";
-import path from 'path';
-import {makeFolders} from './lib/directory.mjs'
+import path from "path";
+import { makeFolders } from "./lib/directory.mjs";
 
+const fatherUrl = "https://kitpro-architera.webflow.io/";
 
-
-const fatherUrl = "http://eduardos-fabulous-site-57049f.webflow.io/";
-
-import fs from 'fs'
-import {v4 as uuid} from 'uuid'
-import archiver from 'archiver'
+import fs from "fs";
+import { v4 as uuid } from "uuid";
+import archiver from "archiver";
 
 let linksUsed = [];
 let imagesUsed = {};
 
 (async () => {
   try {
-let tmpName = fatherUrl.replace('https://' ,'').replace('http://', '');
-const last = tmpName.indexOf('.webflow');
- tmpName = tmpName.substring(0, last) + '.zip';
+    let tmpName = fatherUrl.replace("https://", "").replace("http://", "");
+    const last = tmpName.indexOf(".webflow");
+    tmpName = tmpName.substring(0, last) + ".zip";
 
     const jsPath = "./scripts";
     const cssPath = "./css";
@@ -33,8 +31,8 @@ const last = tmpName.indexOf('.webflow');
     const urls = [fatherUrl];
     makeFolders(paths);
     await processWebsites(urls, jsPath, cssPath, htmlPath, imagesPath);
-   await zipFolders(paths, tmpName);
-    await removeFolders(paths)
+    await zipFolders(paths, tmpName);
+    await removeFolders(paths);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -93,54 +91,53 @@ function findLinks($, url) {
 }
 
 async function zipFolders(folderPaths, zipFileName) {
-    return new Promise((resolve, reject) => {
-        const output = fs.createWriteStream(zipFileName);
-        const archive = archiver('zip', {
-            zlib: { level: 9 },
-        });
-
-        archive.pipe(output);
-
-        folderPaths.forEach(folderPath => {
-            if (fs.existsSync(folderPath)) {
-                const folderName = path.basename(folderPath); // Get the base folder name
-                archive.directory(folderPath, folderName); // Add the folder to the archive with its original name
-            } else {
-                console.error(`Folder '${folderPath}' does not exist.`);
-            }
-        });
-
-        archive.finalize();
-
-        output.on('close', () => {
-            resolve(); // Resolve the promise when the zip creation is successful
-        });
-
-        archive.on('error', err => {
-            console.error('Error creating zip file:', err);
-            reject(err); // Reject the promise if there's an error
-        });
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(zipFileName);
+    const archive = archiver("zip", {
+      zlib: { level: 9 },
     });
+
+    archive.pipe(output);
+
+    folderPaths.forEach((folderPath) => {
+      if (fs.existsSync(folderPath)) {
+        const folderName = path.basename(folderPath); // Get the base folder name
+        archive.directory(folderPath, folderName); // Add the folder to the archive with its original name
+      } else {
+        console.error(`Folder '${folderPath}' does not exist.`);
+      }
+    });
+
+    archive.finalize();
+
+    output.on("close", () => {
+      resolve(); // Resolve the promise when the zip creation is successful
+    });
+
+    archive.on("error", (err) => {
+      console.error("Error creating zip file:", err);
+      reject(err); // Reject the promise if there's an error
+    });
+  });
 }
 
-
 async function removeFolders(list) {
-    for (let i = 0; i < list.length; i++) {
-        const path = list[i];
-        try {
-            fs.rmSync(path, { recursive: true, force: true });
-        } catch (err) {
-            console.error(`Error emptying directory ${path}: ${err.message}`);
-        }
+  for (let i = 0; i < list.length; i++) {
+    const path = list[i];
+    try {
+      fs.rmSync(path, { recursive: true, force: true });
+    } catch (err) {
+      console.error(`Error emptying directory ${path}: ${err.message}`);
     }
-    
-    // for (let i = 0; i < list.length; i++) {
-    //     const path = list[i];
-    //     console.log(`Deleting directory ${path}`);
-    //     try {
-    //         await fsExtra.remove(path); // Delete the directory
-    //     } catch (err) {
-    //         console.error(`Error deleting directory ${path}: ${err.message}`);
-    //     }
-    // }
+  }
+
+  // for (let i = 0; i < list.length; i++) {
+  //     const path = list[i];
+  //     console.log(`Deleting directory ${path}`);
+  //     try {
+  //         await fsExtra.remove(path); // Delete the directory
+  //     } catch (err) {
+  //         console.error(`Error deleting directory ${path}: ${err.message}`);
+  //     }
+  // }
 }
