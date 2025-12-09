@@ -8,7 +8,7 @@ import {
 import path from "path";
 import { makeFolders } from "./lib/directory.mjs";
 
-const fatherUrl = "https://kitpro-architera.webflow.io/";
+const fatherUrl = "https://zeus-template.webflow.io/";
 
 import fs from "fs";
 import { v4 as uuid } from "uuid";
